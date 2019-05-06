@@ -10,6 +10,14 @@ which is a dump of the network activity.
 
 This package provides an API for extracting the data from these files.
 
+## Installation
+
+Install from PyPi.
+
+```bash
+pip install iex_parser
+```
+
 ## Example
 
 The following code processes the TOPS sample file downloaded from IEX.
