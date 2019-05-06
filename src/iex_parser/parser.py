@@ -95,6 +95,7 @@ class DeepPcapReader:
 
 class Parser:
 
+    # noinspection PyArgumentList
     def __init__(self, filename: str, protocol: str) -> None:
         self.reader = PcapReader(filename)
         self.protocol = protocol
