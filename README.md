@@ -20,12 +20,12 @@ pip install iex_parser
 
 ## Example
 
-The following code processes the TOPS sample file downloaded from IEX.
+The following code processes the TOPS sample file downloaded from IEX. Not the file doesn't have to be unzipped.
 
 ```python
 from iex_parser import Parser, TOPS_1_6
 
-TOPS_SAMPLE_DATA_FILE = 'data_feeds_20180127_20180127_IEXTP1_TOPS1.6.pcap'
+TOPS_SAMPLE_DATA_FILE = 'data_feeds_20180127_20180127_IEXTP1_TOPS1.6.pcap.gz'
 
 with Parser(TOPS_SAMPLE_DATA_FILE, TOPS_1_6) as reader:
     for message in reader:
@@ -48,7 +48,7 @@ The following code processes the DEEP sample file downloaded from IEX.
 ```python
 from iex_parser import Parser, DEEP_1_0
 
-DEEP_SAMPLE_DATA_FILE = 'data_feeds_20180127_20180127_IEXTP1_DEEP1.0.pcap'
+DEEP_SAMPLE_DATA_FILE = 'data_feeds_20180127_20180127_IEXTP1_DEEP1.0.pcap.gz'
 
 with Parser(DEEP_SAMPLE_DATA_FILE, DEEP_1_0) as reader:
     for message in reader:
