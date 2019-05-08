@@ -16,7 +16,7 @@ LULD_TIER = {
 }
 
 
-def from_security_flags(flags: int) -> List[str]:
+def from_security_directory_flags(flags: int) -> List[str]:
     flag_set = []
     if flags & 0x80 != 0:
         flag_set.append('test')
@@ -40,14 +40,26 @@ def from_sale_condition_flags(flags: int) -> List[str]:
     if flags & 0x80 != 0:
         flag_set.append('iso')
     if flags & 0x40 != 0:
-        flag_set.append('out_of_hours')
+        flag_set.append('extended_hours')
     if flags & 0x20 != 0:
         flag_set.append('odd_lot')
     if flags & 0x10 != 0:
-        flag_set.append('trade_through_except')
+        flag_set.append('trade_through_excempt')
     if flags & 0x08 != 0:
         flag_set.append('single_price_cross')
     return flag_set
+
+
+def is_last_sale_eligable(flags: int) -> bool:
+    return flags & 0x40 == 0 and flags & 0x20 == 0
+
+
+def is_high_low_price_eligable(flags: int) -> bool:
+    return flags & 0x40 == 0 and flags & 0x20 == 0
+
+
+def is_volume_eligable(flags: int) -> bool:
+    return True
 
 
 OFFICIAL_PRICE_TYPE = {
