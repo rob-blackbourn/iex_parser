@@ -20,7 +20,7 @@ pip install iex_parser
 
 ## Example
 
-The following code processes the TOPS sample file downloaded from IEX. Not the file doesn't have to be unzipped.
+The following code processes the TOPS sample file downloaded from IEX. Note the file doesn't have to be unzipped.
 
 ```python
 from iex_parser import Parser, TOPS_1_6
