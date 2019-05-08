@@ -1,9 +1,14 @@
-import struct
-from typing import NamedTuple, Mapping, Optional, List, Any
+import logging
+import queue
 from scapy.all import PcapReader, Packet
 from scapy.layers.l2 import Ether
 from scapy.layers.inet import UDP
+import struct
+import threading
+from typing import NamedTuple, Mapping, Optional, List, Any
 from .messages import decode_message
+
+logger = logging.getLogger(__name__)
 
 
 class Header(NamedTuple):
@@ -32,38 +37,55 @@ class Header(NamedTuple):
 
 class DeepPcapReader:
 
-    def __init__(self, reader: PcapReader, protocol: str) -> None:
+    def __init__(self, reader: PcapReader, protocol: str, queue_length) -> None:
         self.reader = reader
         self.protocol = protocol
-        self.messages: List[Mapping[str, Any]] = []
+        self.messages = queue.Queue(queue_length)
+        self.sentinal = object()
+        self.cancellation_token = threading.Event()
+        self.fill_thread = threading.Thread(target=self._fill)
+
 
     def __iter__(self):
+        self.fill_thread.start()
         return self
 
-    def __next__(self):
-        if len(self.messages) == 0:
-            if not self._fill():
-                raise StopIteration
-        return self.messages.pop()
 
-    def _fill(self) -> bool:
-        while True:
+    def __next__(self) -> Mapping[str, Any]:
+        message = self.messages.get()
+        if message == self.sentinal:
+            self.fill_thread.join()
+            raise StopIteration
+        return message
+
+
+    def _fill(self) -> None:
+        is_eof = False
+
+        while not (is_eof or self.cancellation_token.is_set()):
+            logging.debug(f'Reading packet: len(queue)={self.messages.qsize()}')
             packet: Packet = self.reader.read_packet()
             if packet is None:
-                return False
-            if not isinstance(packet, Ether) and packet.haslayer(UDP):
+                is_eof = True
+                self.messages.put(self.sentinal)
+            elif not isinstance(packet, Ether) and packet.haslayer(UDP):
                 raise RuntimeError('Invalid packet')
-            layer: UDP = packet[UDP]
-            buf = layer.payload.load
-            messages = self._read(buf)
-            if messages is not None:
-                self.messages += messages
-                return True
+            else:
+                layer: UDP = packet[UDP]
+                buf = layer.payload.load
+                messages = self._read(buf)
+                if messages is not None:
+                    for message in messages:
+                        self.messages.put(message)
+
+        logging.debug('All packets read')
+
 
     HEADER_PATTERN = '<BxHIIHHqqq'
     HEADER_SIZE = struct.calcsize(HEADER_PATTERN)
     MESSAGE_LENGTH_PATTERN = '<h'
     MESSAGE_LENGTH_SIZE = struct.calcsize(MESSAGE_LENGTH_PATTERN)
+
 
     def _read(self, buf: bytes) -> Optional[List[Mapping[str, Any]]]:
         # Read the header.
@@ -87,6 +109,7 @@ class DeepPcapReader:
 
         return messages
 
+
     def _parse_message(self, buf: bytes) -> Mapping[str, Any]:
         message_type = buf[0]
         message_body = buf[1:]
@@ -96,13 +119,16 @@ class DeepPcapReader:
 class Parser:
 
     # noinspection PyArgumentList
-    def __init__(self, filename: str, protocol: str) -> None:
+    def __init__(self, filename: str, protocol: str, queue_length=25000) -> None:
         self.reader = PcapReader(filename)
         self.protocol = protocol
+        self.queue_length = queue_length
+
 
     def __enter__(self) -> DeepPcapReader:
         self.reader.__enter__()
-        return DeepPcapReader(self.reader, self.protocol)
+        return DeepPcapReader(self.reader, self.protocol, self.queue_length)
+
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.reader.__exit__(exc_type, exc_val, exc_tb)

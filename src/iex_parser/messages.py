@@ -8,6 +8,10 @@ def _from_timestamp(value: int) -> datetime:
     return datetime.fromtimestamp(value / 10 ** 9, tz=timezone.utc)
 
 
+def _from_event_time(value: int) -> datetime:
+    return datetime.fromtimestamp(value, tz=timezone.utc)
+
+
 def _from_price(value: int) -> Decimal:
     return Decimal(value) / 10 ** 4
 
@@ -206,7 +210,7 @@ def _decode_auction_information(buf: bytes) -> Mapping[str, Any]:
         'imbalance_shares': imbalance_shares,
         'imbalance_side': imbalance_side.strip(),
         'extension_number': extension_number,
-        'scheduled_auction_time': scheduled_auction_time,
+        'scheduled_auction_time': _from_event_time(scheduled_auction_time),
         'auction_book_clearing_price': _from_price(auction_book_clearing_price),
         'collar_reference_price': _from_price(collar_reference_price),
         'lower_auction_collar_price': _from_price(lower_auction_collar_price),
