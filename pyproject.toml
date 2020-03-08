@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "iex_parser"
+version = "1.0.0"
+description = "Parser for IEX data files"
+repository = "https://github.com/rob-blackbourn/iex_parser"
+authors = ["Rob Blackbourn <rob.blackbourn@gmail.com>"]
+keywords = ['iex', 'parser', 'pcap']
+license = "Apache-2.0"
+readme = "README.md"
+packages = [
+  { include = "iex_parser" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+scapy = "^2.4"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "^1.4"
+mypy = "^0.740.0"
+pylint = "^2.4"
+pytest = "^5.3"
+pytest-runner = "^5.2"
+rope = "^0.16.0"
+stringcase = "^1.2.0"
+mkdocs = "^1.0.4"
+mkdocs-material = "^4.6.0"
+jetblack-markdown = "^0.6"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
