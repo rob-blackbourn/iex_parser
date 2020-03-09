@@ -196,9 +196,10 @@ def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent
                                                             message['ordinal'] = ordinal
 
                                                             if not is_silent and ordinal % 1000 == 0:
-                                                                print(message['timestamp'].isoformat())
+                                                                print(f"{message['timestamp'].isoformat()} ({ordinal})", file=sys.stderr)
 
-                                                            if filter and 'symbol' in message and message['symbol'] not in tickers:
+                                                            if tickers and 'symbol' in message and message['symbol'] not in tickers:
+                                                                print(f"Skipping {message['symbol']}")
                                                                 continue
 
                                                             file_ptr = file_ptr_map[message['type']]
