@@ -198,7 +198,7 @@ def _decode_auction_information(buf: bytes) -> Mapping[str, Any]:
     return {
         'type': 'auction_information',
         'auction_type': auction_type.strip(),
-        'timestamp': _from_price(timestamp),
+        'timestamp': _from_timestamp(timestamp),
         'symbol': symbol.strip(),
         'paired_shares': paired_shares,
         'reference_price': _from_price(reference_price),
@@ -206,7 +206,7 @@ def _decode_auction_information(buf: bytes) -> Mapping[str, Any]:
         'imbalance_shares': imbalance_shares,
         'imbalance_side': imbalance_side.strip(),
         'extension_number': extension_number,
-        'scheduled_auction_time': scheduled_auction_time,
+        'scheduled_auction_time': _from_timestamp(scheduled_auction_time),
         'auction_book_clearing_price': _from_price(auction_book_clearing_price),
         'collar_reference_price': _from_price(collar_reference_price),
         'lower_auction_collar_price': _from_price(lower_auction_collar_price),
