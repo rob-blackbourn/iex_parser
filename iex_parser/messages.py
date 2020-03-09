@@ -202,7 +202,7 @@ def _decode_auction_information(buf: bytes) -> Mapping[str, Any]:
     return {
         'type': 'auction_information',
         'auction_type': auction_type.strip(),
-        'timestamp': _from_price(timestamp),
+        'timestamp': _from_timestamp(timestamp),
         'symbol': symbol.strip(),
         'paired_shares': paired_shares,
         'reference_price': _from_price(reference_price),

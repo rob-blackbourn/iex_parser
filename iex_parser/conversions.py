@@ -1,3 +1,5 @@
+"""Conversions"""
+
 from typing import Mapping, List
 
 SYSTEM_EVENT_TYPES: Mapping[bytes, str] = {
