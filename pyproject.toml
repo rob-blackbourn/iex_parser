@@ -11,6 +11,9 @@ packages = [
   { include = "iex_parser" }
 ]
 
+[tool.poetry.scripts]
+iex-to-csv="iex_parser.iex_to_csv:iex_to_csv"
+
 [tool.poetry.dependencies]
 python = "^3.7"
 scapy = "^2.4"

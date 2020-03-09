@@ -9,8 +9,8 @@ import re
 import sys
 from typing import Any, Callable, Dict, IO, List, Mapping
 
-from .parser import Parser
-from .messages import DEEP_1_0, TOPS_1_6
+from iex_parser.parser import Parser
+from iex_parser.messages import DEEP_1_0, TOPS_1_6
 
  # data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz
 FILENAME_REGEX = re.compile(r"data_feeds_(?P<start_date>\d{8})_(?P<end_date>\d{8})_(?P<protocol>[^_]+)_(?P<feed>(DEEP|TOPS))(?P<version>\d+\.\d+)\.pcap\.gz")
@@ -134,7 +134,7 @@ FILE_FORMATS: Mapping[str, Mapping[str, Callable[[Any], str]]] = {
     }
 }
 
-def iex_to_csv(filename: Path, output_folder: Path):
+def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent: bool):
     matches = FILENAME_REGEX.match(filename.name)
 
     if not matches:
@@ -194,6 +194,13 @@ def iex_to_csv(filename: Path, output_folder: Path):
                                                         for message in reader:
                                                             ordinal += 1
                                                             message['ordinal'] = ordinal
+
+                                                            if not is_silent and ordinal % 1000 == 0:
+                                                                print(message['timestamp'].isoformat())
+
+                                                            if filter and 'symbol' in message and message['symbol'] not in tickers:
+                                                                continue
+
                                                             file_ptr = file_ptr_map[message['type']]
                                                             formats = FILE_FORMATS[message['type']]
                                                             data = [
@@ -201,5 +208,39 @@ def iex_to_csv(filename: Path, output_folder: Path):
                                                                 for name, fmt in formats.items()
                                                             ]
                                                             print(",".join(data), file=file_ptr)
-                                                            if ordinal % 1000 == 0:
-                                                                print(f'ordinal={ordinal}')
+
+def parse_args(args):
+    parser = argparse.ArgumentParser("IEX to csv")
+    parser.add_argument(
+        '-i', '--input-file', 
+        help='Input filename',
+        action='store',
+        dest='input_filename')
+    parser.add_argument(
+        '-o', '--output-folder',
+        help='Output folder',
+        action='store',
+        dest='output_folder',
+        default='.')
+    parser.add_argument(
+        '-t', '--ticker',
+        help='Add a ticker to record',
+        action='append',
+        dest='tickers',
+        default=[])
+    parser.add_argument(
+        '-s', '--silent',
+        help='Suppress progress report',
+        action='store_true',
+        dest='is_silent',
+        default=False)
+    return parser.parse_args(args)
+
+def iex_to_csv():
+    args = parse_args(sys.argv[1:])
+    convert(
+        Path(args.input_filename),
+        Path(args.output_folder),
+        [ticker.encode() for ticker in args.tickers],
+        args.is_silent
+    )
