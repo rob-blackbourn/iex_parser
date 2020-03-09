@@ -54,3 +54,24 @@ with Parser(DEEP_SAMPLE_DATA_FILE, DEEP_1_0) as reader:
     for message in reader:
         print(message)
 ```
+
+## Command line tool
+
+There is a command line tool that takes a downloaded file and converts it
+to csv files.
+
+### Usage
+
+```bash
+$ iex-to-csv -i <input-file> -o <output-folder> [-s] [-t <ticker> ...]
+```
+
+The input file must be as downloaded from IEX. This `-s` flag can be used to
+suppress the progress printing. The `-t` flag can be used to select specific
+tickers.
+
+For example:
+
+```bash
+$ iex-to-csv -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -o ~/data/csv
+```
