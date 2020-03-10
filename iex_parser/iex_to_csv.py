@@ -147,7 +147,7 @@ def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent
     feed = dct['feed']
     version = float(dct['version'])
 
-    root_filename = f'data_feed_{start_date:%Y%m%d}_{end_date:%Y%m%d}_{protocol}_DEEP{version}_'
+    root_filename = f'data_feed_{start_date:%Y%m%d}_{end_date:%Y%m%d}_{protocol}_{feed}{version}_'
     security_directory_filename =  root_filename + 'security_directory.csv.gz'
     trading_status_filename =  root_filename + 'trading_status.csv.gz'
     operational_halt_filename =  root_filename + 'operational_halt.csv.gz'
@@ -239,9 +239,14 @@ def parse_args(args):
 
 def iex_to_csv():
     args = parse_args(sys.argv[1:])
-    convert(
-        Path(args.input_filename),
-        Path(args.output_folder),
-        [ticker.encode() for ticker in args.tickers],
-        args.is_silent
-    )
+    try:
+        convert(
+            Path(args.input_filename),
+            Path(args.output_folder),
+            [ticker.encode() for ticker in args.tickers],
+            args.is_silent
+        )
+        return 0
+    except Exception as error:
+        print(error, file=sys.stderr)
+        return -1

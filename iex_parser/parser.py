@@ -64,11 +64,16 @@ class DeepPcapReader:
 
         while not (is_eof or self.cancellation_token.is_set()):
             logging.debug(f'Reading packet: len(queue)={self.messages.qsize()}')
-            packet: Packet = self.reader.read_packet()
-            if packet is None:
+            try:
+                packet: Packet = self.reader.read_packet()
+                if packet is None:
+                    raise EOFError
+            except EOFError:
                 is_eof = True
                 self.messages.put(self.sentinal)
-            elif not isinstance(packet, Ether) and packet.haslayer(UDP):
+                continue
+
+            if not isinstance(packet, Ether) and packet.haslayer(UDP):
                 raise RuntimeError('Invalid packet')
             else:
                 layer: UDP = packet[UDP]
