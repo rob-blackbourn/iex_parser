@@ -225,12 +225,13 @@ to csv files.
 ### Usage
 
 ```bash
-$ iex-to-csv -i <input-file> -o <output-folder> [-s] [-t <ticker> ...]
+$ iex-to-csv -i <input-file> -o <output-folder> [-s] [-t <ticker> ...] [-c]
 ```
 
 The input file must be as downloaded from IEX. This `-s` flag can be used to
 suppress the progress printing. The `-t` flag can be used to select specific
-tickers.
+tickers. The `-c` flag cause the ordinal to be reset when the timestamp changes,
+rather than monotonically increasing.
 
 For example:
 

@@ -7,7 +7,7 @@ import gzip
 from pathlib import Path
 import re
 import sys
-from typing import Any, Callable, Dict, IO, List, Mapping
+from typing import Any, Callable, Dict, IO, List, Mapping, Optional
 
 from iex_parser.parser import Parser
 from iex_parser.messages import DEEP_1_0, TOPS_1_6
@@ -134,7 +134,13 @@ FILE_FORMATS: Mapping[str, Mapping[str, Callable[[Any], str]]] = {
     }
 }
 
-def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent: bool):
+def convert(
+        filename: Path,
+        output_folder: Path,
+        tickers: List[bytes],
+        is_silent: bool,
+        is_timestamp_ordinal
+) -> None:
     matches = FILENAME_REGEX.match(filename.name)
 
     if not matches:
@@ -165,6 +171,7 @@ def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent
 
     file_ptr_map: Dict[str, IO[Any]] = {}
     ordinal = 0
+    previous_timestamp: Optional[datetime] = None
     with Parser(str(filename), feed_def) as reader:
         with gzip.open(output_folder / security_directory_filename, "wt") as file_ptr_map['security_directive']:
             print(",".join(FILE_FORMATS['security_directive'].keys()), file=file_ptr_map['security_directive'])
@@ -192,8 +199,11 @@ def convert(filename: Path, output_folder: Path, tickers: List[bytes], is_silent
                                                         print(",".join(FILE_FORMATS['system_event'].keys()), file=file_ptr_map['system_event'])
 
                                                         for message in reader:
+                                                            if is_timestamp_ordinal and previous_timestamp != message['timestamp']:
+                                                                ordinal = 0
                                                             ordinal += 1
                                                             message['ordinal'] = ordinal
+                                                            previous_timestamp = message['timestamp']
 
                                                             if not is_silent and ordinal % 1000 == 0:
                                                                 print(f"{message['timestamp'].isoformat()} ({ordinal})", file=sys.stderr)
@@ -235,6 +245,12 @@ def parse_args(args):
         action='store_true',
         dest='is_silent',
         default=False)
+    parser.add_argument(
+        '-c', '--timestamp-ordinal',
+        help='Reset the ordinal when the timestamp changes',
+        action='store_true',
+        dest='is_timestamp_ordinal',
+        default=False)
     return parser.parse_args(args)
 
 def iex_to_csv():
@@ -244,7 +260,8 @@ def iex_to_csv():
             Path(args.input_filename),
             Path(args.output_folder),
             [ticker.encode() for ticker in args.tickers],
-            args.is_silent
+            args.is_silent,
+            args.is_timestamp_ordinal
         )
         return 0
     except Exception as error:

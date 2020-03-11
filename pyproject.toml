@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "iex_parser"
-version = "1.3.0"
+version = "1.4.0"
 description = "Parser for IEX data files"
 repository = "https://github.com/rob-blackbourn/iex_parser"
 authors = ["Rob Blackbourn <rob.blackbourn@gmail.com>"]
