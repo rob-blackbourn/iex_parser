@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "iex_parser"
-version = "1.4.0"
+version = "1.5.0"
 description = "Parser for IEX data files"
 repository = "https://github.com/rob-blackbourn/iex_parser"
 authors = ["Rob Blackbourn <rob.blackbourn@gmail.com>"]
@@ -13,6 +13,7 @@ packages = [
 
 [tool.poetry.scripts]
 iex-to-csv="iex_parser.iex_to_csv:iex_to_csv"
+iex-to-json="iex_parser.iex_to_json:iex_to_json"
 
 [tool.poetry.dependencies]
 python = "^3.7"

@@ -209,7 +209,8 @@ def convert(
                                                                 print(f"{message['timestamp'].isoformat()} ({ordinal})", file=sys.stderr)
 
                                                             if tickers and 'symbol' in message and message['symbol'] not in tickers:
-                                                                print(f"Skipping {message['symbol']}")
+                                                                if not is_silent:
+                                                                    print(f"Skipping {message['symbol']}", file=sys.stderr)
                                                                 continue
 
                                                             file_ptr = file_ptr_map[message['type']]
