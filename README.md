@@ -57,7 +57,7 @@ with Parser(DEEP_SAMPLE_DATA_FILE, DEEP_1_0) as reader:
 
 ## Speed
 
-Becuase the data is distributed as a dump of network packets, there are a lot of "empty" 
+Because the data is distributed as a dump of network packets, there are a lot of "empty" 
 packets. These take time to read and slow the delivery of the real data. To handle this
 the packets are read on a separate python thread and queued. The size of the queue is an
 optional parameter to the `Parser`, and has been set by experimentation to 25000.
