@@ -55,6 +55,74 @@ with Parser(DEEP_SAMPLE_DATA_FILE, DEEP_1_0) as reader:
         print(message)
 ```
 
+## Notes
+
+Becuase the data is distributed as a dump of network packets, there are a lot of "empty" 
+packets. These take time to read and slow the delivery of the real data. To handle this
+the packets are read on a separate python thread and queued. The size of the queue is an
+optional parameter to the `Parser`, and has been set by experimentation to 25000.
+
+## Speed
+
+The main question I get is: can it go any faster?
+
+The short answer is no. However the reason for the slowness is the time spent
+reading and skipping network data in the "pcap" file.
+
+The solution is to convert the downloaded "pcap" files into csv or JSON.
+
+## Command line tools
+
+There are command line tools that takes a downloaded file and converts it
+to csv files or a JSON file.
+
+### iex-to-csv
+
+```bash
+$ iex-to-csv -i <input-file> -o <output-folder> [-s] [-t <ticker> ...] [-c]
+```
+
+The input file must be as downloaded from IEX. This `-s` flag can be used to
+suppress the progress printing. The `-t` flag can be used to select specific
+tickers. The `-c` flag cause the ordinal to be reset when the timestamp changes,
+rather than monotonically increasing. A file for every message type is produced.
+
+For example:
+
+```bash
+$ iex-to-csv -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -o ~/data/csv
+```
+
+
+### iex-to-json
+
+```bash
+$ iex-to-csv -i <input-file> -o <output-path> [-s] [-t <ticker> ...]
+```
+
+The input file must be as downloaded from IEX. This `-s` flag can be used to
+suppress the progress printing. The `-t` flag can be used to select specific
+tickers. A single file is produced containing a JSON message per line.
+
+For example:
+
+```bash
+$ iex-to-json -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -o ~/data/json/
+```
+
+There is a helper function to load this data:
+
+```python
+from pathlib import Path
+from iex_parser.iex_to_json import load_json
+
+INPUT_FILENAME = Path('data_feeds_20200305_20200305_IEXTP1_DEEP1.0.json.gz')
+
+for obj in load_json(INPUT_FILENAME):
+    if obj['type'] == 'trade_report':
+        print(obj)
+```
+
 ## Messages
 
 The messages are returned as dictionaries.
@@ -208,63 +276,4 @@ The messages are returned as dictionaries.
     'timestamp': datetime.datetime,
     'symbol': bytes
 }
-```
-
-## Notes
-
-Becuase the data is distributed as a dump of network packets, there are a lot of "empty" 
-packets. These take time to read and slow the delivery of the real data. To handle this
-the packets are read on a separate python thread and queued. The size of the queue is an
-optional parameter to the `Parser`, and has been set by experimentation to 25000.
- 
-## Command line tools
-
-There are command line tools that takes a downloaded file and converts it
-to csv files or a JSON file.
-
-### iex-to-csv
-
-```bash
-$ iex-to-csv -i <input-file> -o <output-folder> [-s] [-t <ticker> ...] [-c]
-```
-
-The input file must be as downloaded from IEX. This `-s` flag can be used to
-suppress the progress printing. The `-t` flag can be used to select specific
-tickers. The `-c` flag cause the ordinal to be reset when the timestamp changes,
-rather than monotonically increasing. A file for every message type is produced.
-
-For example:
-
-```bash
-$ iex-to-csv -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -o ~/data/csv
-```
-
-
-### iex-to-json
-
-```bash
-$ iex-to-csv -i <input-file> -o <output-path> [-s] [-t <ticker> ...]
-```
-
-The input file must be as downloaded from IEX. This `-s` flag can be used to
-suppress the progress printing. The `-t` flag can be used to select specific
-tickers. A single file is produced containing a JSON message per line.
-
-For example:
-
-```bash
-$ iex-to-json -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -o ~/data/json/
-```
-
-There is a helper function to load this data:
-
-```python
-from pathlib import Path
-from iex_parser.iex_to_json import load_json
-
-INPUT_FILENAME = Path('data_feeds_20200305_20200305_IEXTP1_DEEP1.0.json.gz')
-
-for obj in load_json(INPUT_FILENAME):
-    if obj['type'] == 'trade_report':
-        print(obj)
 ```
