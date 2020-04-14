@@ -95,7 +95,7 @@ $ iex-to-csv -i ~/data/raw/data_feeds_20200305_20200305_IEXTP1_DEEP1.0.pcap.gz -
 ### iex-to-json
 
 ```bash
-$ iex-to-csv -i <input-file> -o <output-path> [-s] [-t <ticker> ...]
+$ iex-to-json -i <input-file> -o <output-path> [-s] [-t <ticker> ...]
 ```
 
 The input file must be as downloaded from IEX. This `-s` flag can be used to
