@@ -55,21 +55,19 @@ with Parser(DEEP_SAMPLE_DATA_FILE, DEEP_1_0) as reader:
         print(message)
 ```
 
-## Notes
+## Speed
 
 Becuase the data is distributed as a dump of network packets, there are a lot of "empty" 
 packets. These take time to read and slow the delivery of the real data. To handle this
 the packets are read on a separate python thread and queued. The size of the queue is an
 optional parameter to the `Parser`, and has been set by experimentation to 25000.
 
-## Speed
-
 The main question I get is: can it go any faster?
 
 The short answer is no. However the reason for the slowness is the time spent
-reading and skipping network data in the "pcap" file.
+reading and skipping network data in the `pcap` file.
 
-The solution is to convert the downloaded "pcap" files into csv or JSON.
+The solution is to convert the downloaded `pcap` files into `csv` or `JSON`.
 
 ## Command line tools
 
