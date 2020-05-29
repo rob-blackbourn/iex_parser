@@ -45,11 +45,9 @@ class DeepPcapReader:
         self.cancellation_token = threading.Event()
         self.fill_thread = threading.Thread(target=self._fill)
 
-
     def __iter__(self):
         self.fill_thread.start()
         return self
-
 
     def __next__(self) -> Mapping[str, Any]:
         message = self.messages.get()
@@ -58,12 +56,14 @@ class DeepPcapReader:
             raise StopIteration
         return message
 
-
     def _fill(self) -> None:
         is_eof = False
 
         while not (is_eof or self.cancellation_token.is_set()):
-            logging.debug(f'Reading packet: len(queue)={self.messages.qsize()}')
+            logging.debug(
+                'Reading packet: len(queue)=%s',
+                self.messages.qsize()
+            )
             try:
                 packet: Packet = self.reader.read_packet()
                 if packet is None:
@@ -73,9 +73,7 @@ class DeepPcapReader:
                 self.messages.put(self.sentinal)
                 continue
 
-            if not isinstance(packet, Ether) and packet.haslayer(UDP):
-                raise RuntimeError('Invalid packet')
-            else:
+            if isinstance(packet, Ether) and packet.haslayer(UDP):
                 layer: UDP = packet[UDP]
                 buf = layer.payload.load
                 messages = self._read(buf)
@@ -85,16 +83,17 @@ class DeepPcapReader:
 
         logging.debug('All packets read')
 
-
     HEADER_PATTERN = '<BxHIIHHqqq'
     HEADER_SIZE = struct.calcsize(HEADER_PATTERN)
     MESSAGE_LENGTH_PATTERN = '<h'
     MESSAGE_LENGTH_SIZE = struct.calcsize(MESSAGE_LENGTH_PATTERN)
 
-
     def _read(self, buf: bytes) -> Optional[List[Mapping[str, Any]]]:
         # Read the header.
-        header = Header(*struct.unpack(self.HEADER_PATTERN, buf[:self.HEADER_SIZE]))
+        header = Header(
+            *struct.unpack(self.HEADER_PATTERN,
+                           buf[:self.HEADER_SIZE])
+        )
         if len(buf) != self.HEADER_SIZE + header.payload_length:
             raise RuntimeError('Invalid payload')
         if header.payload_length == 0:
@@ -114,7 +113,6 @@ class DeepPcapReader:
 
         return messages
 
-
     def _parse_message(self, buf: bytes) -> Mapping[str, Any]:
         message_type = buf[0]
         message_body = buf[1:]
@@ -129,11 +127,9 @@ class Parser:
         self.protocol = protocol
         self.queue_length = queue_length
 
-
     def __enter__(self) -> DeepPcapReader:
         self.reader.__enter__()
         return DeepPcapReader(self.reader, self.protocol, self.queue_length)
-
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.reader.__exit__(exc_type, exc_val, exc_tb)
