@@ -1,11 +1,15 @@
+"""The parser"""
+
 import logging
 import queue
-from scapy.all import PcapReader, Packet
-from scapy.layers.l2 import Ether
-from scapy.layers.inet import UDP
 import struct
 import threading
 from typing import NamedTuple, Mapping, Optional, List, Any
+
+from scapy.all import PcapReader, Packet
+from scapy.layers.l2 import Ether
+from scapy.layers.inet import UDP
+
 from .messages import decode_message
 
 logger = logging.getLogger(__name__)
@@ -67,8 +71,10 @@ class DeepPcapReader:
             try:
                 packet: Packet = self.reader.read_packet()
                 if packet is None:
+                    logging.debug('Read empty packet and assuming EOF')
                     raise EOFError
             except EOFError:
+                logging.debug('End of file')
                 is_eof = True
                 self.messages.put(self.sentinal)
                 continue
@@ -102,11 +108,11 @@ class DeepPcapReader:
         # Read the messages.
         messages = []
         start = self.HEADER_SIZE
-        for message_number in range(header.message_count):
+        for _message_number in range(header.message_count):
             end = start + self.MESSAGE_LENGTH_SIZE
-            message_lengh = struct.unpack("<H", buf[start:end])[0]
+            message_length = struct.unpack("<H", buf[start:end])[0]
             start = end
-            end += message_lengh
+            end += message_length
             message = self._parse_message(buf[start:end])
             messages.append(message)
             start = end

@@ -122,7 +122,29 @@ def _decode_quote_update(buf: bytes) -> Mapping[str, Any]:
     }
 
 
-def _decode_trade_report(buf: bytes) -> Mapping[str, Any]:
+def _decode_trade_report_tops_1_5(buf: bytes) -> Mapping[str, Any]:
+    (
+        flags,
+        timestamp,
+        symbol,
+        size,
+        price,
+        trade_id,
+        _reserved
+    ) = struct.unpack('<Bq8sLqqL', buf)
+
+    return {
+        'type': 'trade_report',
+        'flags': flags,
+        'timestamp': _from_timestamp(timestamp),
+        'symbol': symbol.strip(),
+        'size': size,
+        'price': _from_price(price),
+        'trade_id': trade_id
+    }
+
+
+def _decode_trade_report_deep_1_0(buf: bytes) -> Mapping[str, Any]:
     (
         flags,
         timestamp,
@@ -160,7 +182,29 @@ def _decode_official_price(buf: bytes) -> Mapping[str, Any]:
     }
 
 
-def _decode_trade_break(buf: bytes) -> Mapping[str, Any]:
+def _decode_trade_break_tops_1_5(buf: bytes) -> Mapping[str, Any]:
+    (
+        flags,
+        timestamp,
+        symbol,
+        size,
+        price,
+        trade_id,
+        _reserved
+    ) = struct.unpack('<1sq8sLqqL', buf)
+
+    return {
+        'type': 'trade_break',
+        'flags': flags,
+        'timestamp': _from_timestamp(timestamp),
+        'symbol': symbol.strip(),
+        'size': size,
+        'price': _from_price(price),
+        'trade_id': trade_id
+    }
+
+
+def _decode_trade_break_deep_1_0(buf: bytes) -> Mapping[str, Any]:
     (
         flags,
         timestamp,
@@ -253,28 +297,38 @@ def _decode_security_event_message(buf: bytes) -> Mapping[str, Any]:
     }
 
 
-_DECODERS: Mapping[int, Callable[[bytes], Mapping[str, Any]]] = {
+_DECODERS_TOPS_1_5: Mapping[int, Callable[[bytes], Mapping[str, Any]]] = {
+    0x51: _decode_quote_update,
+    0x54: _decode_trade_report_tops_1_5,
+    0x42: _decode_trade_break_tops_1_5,
+}
+
+_DECODERS_DEEP_1_0: Mapping[int, Callable[[bytes], Mapping[str, Any]]] = {
     0x53: _decode_system_event,
     0x44: _decode_security_directory,
     0x48: _decode_trading_status,
     0x4f: _decode_operational_halt,
     0x50: _decode_short_sale_price_test_status,
     0x51: _decode_quote_update,
-    0x54: _decode_trade_report,
+    0x54: _decode_trade_report_deep_1_0,
     0x58: _decode_official_price,
-    0x42: _decode_trade_break,
+    0x42: _decode_trade_break_deep_1_0,
     0x41: _decode_auction_information,
     0x38: lambda buf: _decode_price_level_update(b'B', buf),
     0x35: lambda buf: _decode_price_level_update(b'S', buf),
     0x45: _decode_security_event_message
 }
 
+_DECODERS_TOPS_1_6 = _DECODERS_DEEP_1_0
+
 DEEP_1_0 = 'DEEPv1.0'
 TOPS_1_6 = 'TOPSv1.6'
+TOPS_1_5 = 'TOPSv1.5'
 
 _VERSIONED_DECODERS: Mapping[str, Mapping[int, Callable[[bytes], Mapping[str, Any]]]] = {
-    DEEP_1_0: _DECODERS,
-    TOPS_1_6: _DECODERS
+    DEEP_1_0: _DECODERS_DEEP_1_0,
+    TOPS_1_6: _DECODERS_TOPS_1_6,
+    TOPS_1_5: _DECODERS_TOPS_1_5
 }
 
 

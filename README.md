@@ -1,6 +1,6 @@
 # iex_parser
 
-Parser for IEX pcap DEEP and TOPS files.
+Parser for IEX pcap DEEP (1.0) and TOPS (1.5, 1.6) files.
 
 ## Overview
 
@@ -20,7 +20,9 @@ pip install iex_parser
 
 ## Example
 
-The following code processes the TOPS sample file downloaded from IEX. Note the file doesn't have to be unzipped.
+The following code processes the TOPS sample file downloaded from IEX. Note the
+file doesn't have to be unzipped. For version 1.6 use `TOPS_1_6`, for 1.5 use
+`TOPS_1_5`.
 
 ```python
 from iex_parser import Parser, TOPS_1_6
