@@ -54,6 +54,12 @@ FILE_FORMATS: Mapping[str, Mapping[str, Callable[[Any], str]]] = {
         'symbol': bytes_to_str,
         'reason': bytes_to_str,
     },
+    'retail_liquidity_indicator': {
+        'ordinal': int_to_str,
+        'timestamp': timestamp_to_str,
+        'indicator': bytes_to_str,
+        'symbol': bytes_to_str,
+    },
     'operational_halt': {
         'ordinal': int_to_str,
         'timestamp': timestamp_to_str,
@@ -217,6 +223,7 @@ def _convert_deep_1_0_and_tops_1_6(
     root_filename = f'data_feed_{start_date:%Y%m%d}_{end_date:%Y%m%d}_{protocol}_{feed}{version}_'
     security_directory_filename = root_filename + 'security_directory.csv.gz'
     trading_status_filename = root_filename + 'trading_status.csv.gz'
+    retail_liquidity_indicator_filename = root_filename + 'retail_liquidity_indicator.csv.gz'
     operational_halt_filename = root_filename + 'operational_halt.csv.gz'
     short_sale_price_test_status_filename = root_filename + \
         'short_sale_price_test_status.csv.gz'
@@ -250,123 +257,131 @@ def _convert_deep_1_0_and_tops_1_6(
                     file=file_ptr_map['trading_status']
                 )
                 with gzip.open(
-                        output_folder / operational_halt_filename,
+                        output_folder / retail_liquidity_indicator_filename,
                         "wt"
-                ) as file_ptr_map['operational_halt']:
+                ) as file_ptr_map['retail_liquidity_indicator']:
                     print(
-                        ",".join(FILE_FORMATS['operational_halt'].keys()),
-                        file=file_ptr_map['operational_halt']
+                        ",".join(FILE_FORMATS['retail_liquidity_indicator'].keys()),
+                        file=file_ptr_map['retail_liquidity_indicator']
                     )
                     with gzip.open(
-                            output_folder / short_sale_price_test_status_filename,
+                            output_folder / operational_halt_filename,
                             "wt"
-                    ) as file_ptr_map['short_sale_price_test_status']:
+                    ) as file_ptr_map['operational_halt']:
                         print(
-                            ",".join(
-                                FILE_FORMATS['short_sale_price_test_status'].keys()),
-                            file=file_ptr_map['short_sale_price_test_status']
+                            ",".join(FILE_FORMATS['operational_halt'].keys()),
+                            file=file_ptr_map['operational_halt']
                         )
                         with gzip.open(
-                                output_folder / quote_update_filename,
+                                output_folder / short_sale_price_test_status_filename,
                                 "wt"
-                        ) as file_ptr_map['quote_update']:
+                        ) as file_ptr_map['short_sale_price_test_status']:
                             print(
-                                ",".join(FILE_FORMATS['quote_update'].keys()),
-                                file=file_ptr_map['quote_update']
+                                ",".join(
+                                    FILE_FORMATS['short_sale_price_test_status'].keys()),
+                                file=file_ptr_map['short_sale_price_test_status']
                             )
                             with gzip.open(
-                                    output_folder / trade_report_filename,
+                                    output_folder / quote_update_filename,
                                     "wt"
-                            ) as file_ptr_map['trade_report']:
+                            ) as file_ptr_map['quote_update']:
                                 print(
-                                    ",".join(
-                                        FILE_FORMATS['trade_report'].keys()),
-                                    file=file_ptr_map['trade_report']
+                                    ",".join(FILE_FORMATS['quote_update'].keys()),
+                                    file=file_ptr_map['quote_update']
                                 )
                                 with gzip.open(
-                                        output_folder / official_price_filename,
+                                        output_folder / trade_report_filename,
                                         "wt"
-                                ) as file_ptr_map['official_price']:
+                                ) as file_ptr_map['trade_report']:
                                     print(
                                         ",".join(
-                                            FILE_FORMATS['official_price'].keys()),
-                                        file=file_ptr_map['official_price']
+                                            FILE_FORMATS['trade_report'].keys()),
+                                        file=file_ptr_map['trade_report']
                                     )
                                     with gzip.open(
-                                            output_folder / trade_break_filename,
+                                            output_folder / official_price_filename,
                                             "wt"
-                                    ) as file_ptr_map['trade_break']:
+                                    ) as file_ptr_map['official_price']:
                                         print(
                                             ",".join(
-                                                FILE_FORMATS['trade_break'].keys()),
-                                            file=file_ptr_map['trade_break']
+                                                FILE_FORMATS['official_price'].keys()),
+                                            file=file_ptr_map['official_price']
                                         )
                                         with gzip.open(
-                                                output_folder / auction_information_filename,
+                                                output_folder / trade_break_filename,
                                                 "wt"
-                                        ) as file_ptr_map['auction_information']:
+                                        ) as file_ptr_map['trade_break']:
                                             print(
                                                 ",".join(
-                                                    FILE_FORMATS['auction_information'].keys()),
-                                                file=file_ptr_map['auction_information']
+                                                    FILE_FORMATS['trade_break'].keys()),
+                                                file=file_ptr_map['trade_break']
                                             )
                                             with gzip.open(
-                                                    output_folder / price_level_update_filename,
+                                                    output_folder / auction_information_filename,
                                                     "wt"
-                                            ) as file_ptr_map['price_level_update']:
+                                            ) as file_ptr_map['auction_information']:
                                                 print(
                                                     ",".join(
-                                                        FILE_FORMATS['price_level_update'].keys()),
-                                                    file=file_ptr_map['price_level_update']
+                                                        FILE_FORMATS['auction_information'].keys()),
+                                                    file=file_ptr_map['auction_information']
                                                 )
                                                 with gzip.open(
-                                                        output_folder / security_event_filename,
+                                                        output_folder / price_level_update_filename,
                                                         "wt"
-                                                ) as file_ptr_map['security_event']:
+                                                ) as file_ptr_map['price_level_update']:
                                                     print(
                                                         ",".join(
-                                                            FILE_FORMATS['security_event'].keys(
-                                                            )
-                                                        ),
-                                                        file=file_ptr_map['security_event']
+                                                            FILE_FORMATS['price_level_update'].keys()),
+                                                        file=file_ptr_map['price_level_update']
                                                     )
                                                     with gzip.open(
-                                                            output_folder / system_event_filename,
+                                                            output_folder / security_event_filename,
                                                             "wt"
-                                                    ) as file_ptr_map['system_event']:
+                                                    ) as file_ptr_map['security_event']:
                                                         print(
                                                             ",".join(
-                                                                FILE_FORMATS['system_event'].keys(
+                                                                FILE_FORMATS['security_event'].keys(
                                                                 )
                                                             ),
-                                                            file=file_ptr_map['system_event']
+                                                            file=file_ptr_map['security_event']
                                                         )
-
-                                                        for message in reader:
-                                                            if is_timestamp_ordinal and previous_timestamp != message['timestamp']:
-                                                                ordinal = 0
-                                                            ordinal += 1
-                                                            message['ordinal'] = ordinal
-                                                            previous_timestamp = message['timestamp']
-
-                                                            if not is_silent and ordinal % 1000 == 0:
-                                                                print(
-                                                                    f"{message['timestamp'].isoformat()} ({ordinal})", file=sys.stderr)
-
-                                                            if tickers and 'symbol' in message and message['symbol'] not in tickers:
-                                                                if not is_silent:
-                                                                    print(
-                                                                        f"Skipping {message['symbol']}", file=sys.stderr)
-                                                                continue
-
-                                                            file_ptr = file_ptr_map[message['type']]
-                                                            formats = FILE_FORMATS[message['type']]
-                                                            data = [
-                                                                fmt(message[name])
-                                                                for name, fmt in formats.items()
-                                                            ]
+                                                        with gzip.open(
+                                                                output_folder / system_event_filename,
+                                                                "wt"
+                                                        ) as file_ptr_map['system_event']:
                                                             print(
-                                                                ",".join(data), file=file_ptr)
+                                                                ",".join(
+                                                                    FILE_FORMATS['system_event'].keys(
+                                                                    )
+                                                                ),
+                                                                file=file_ptr_map['system_event']
+                                                            )
+
+                                                            for message in reader:
+                                                                if is_timestamp_ordinal and previous_timestamp != message['timestamp']:
+                                                                    ordinal = 0
+                                                                ordinal += 1
+                                                                message['ordinal'] = ordinal
+                                                                previous_timestamp = message['timestamp']
+
+                                                                if not is_silent and ordinal % 1000 == 0:
+                                                                    print(
+                                                                        f"{message['timestamp'].isoformat()} ({ordinal})", file=sys.stderr)
+
+                                                                if tickers and 'symbol' in message and message['symbol'] not in tickers:
+                                                                    if not is_silent:
+                                                                        print(
+                                                                            f"Skipping {message['symbol']}", file=sys.stderr)
+                                                                    continue
+
+                                                                file_ptr = file_ptr_map[message['type']]
+                                                                formats = FILE_FORMATS[message['type']]
+                                                                data = [
+                                                                    fmt(message[name])
+                                                                    for name, fmt in formats.items()
+                                                                ]
+                                                                print(
+                                                                    ",".join(data), file=file_ptr)
 
 
 def convert(
@@ -490,3 +505,6 @@ def iex_to_csv():
     except Exception as error:  # pylint: disable=broad-except
         print(error, file=sys.stderr)
         return -1
+
+if __name__ == '__main__':
+    iex_to_csv()

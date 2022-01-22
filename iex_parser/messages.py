@@ -67,6 +67,21 @@ def _decode_trading_status(buf: bytes) -> Mapping[str, Any]:
     }
 
 
+def _decode_retail_liquidity_idicator(buf: bytes) -> Mapping[str, Any]:
+    (
+        indicator,
+        timestamp,
+        symbol,
+    ) = struct.unpack('<1sq8s', buf)
+
+    return {
+        'type': 'retail_liquidity_indicator',
+        'indicator': indicator.strip(),
+        'timestamp': _from_timestamp(timestamp),
+        'symbol': symbol.strip(),
+    }
+
+
 def _decode_operational_halt(buf: bytes) -> Mapping[str, Any]:
     (
         halt_status,
@@ -307,6 +322,7 @@ _DECODERS_DEEP_1_0: Mapping[int, Callable[[bytes], Mapping[str, Any]]] = {
     0x53: _decode_system_event,
     0x44: _decode_security_directory,
     0x48: _decode_trading_status,
+    0x49: _decode_retail_liquidity_idicator,
     0x4f: _decode_operational_halt,
     0x50: _decode_short_sale_price_test_status,
     0x51: _decode_quote_update,

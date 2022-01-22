@@ -87,6 +87,9 @@ def load_json(input_file: Path) -> Iterator[Mapping[str, Any]]:
                 obj['status'] = obj['status'].encode()
                 obj['symbol'] = obj['symbol'].encode()
                 obj['reason'] = obj['reason'].encode()
+            elif obj['type'] == 'retail_liquidity_indicator':
+                obj['status'] = obj['indicator'].encode()
+                obj['symbol'] = obj['symbol'].encode()
             elif obj['type'] == 'operational_halt':
                 obj['halt_status'] = obj['halt_status'].encode()
                 obj['symbol'] = obj['symbol'].encode()
