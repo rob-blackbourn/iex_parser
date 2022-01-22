@@ -27,7 +27,7 @@ pytest = "^5.3"
 pytest-runner = "^5.2"
 rope = "^0.16.0"
 stringcase = "^1.2.0"
-mkdocs = "^1.0.4"
+mkdocs = "^1.2.3"
 mkdocs-material = "^4.6.0"
 jetblack-markdown = "^0.6"
 
